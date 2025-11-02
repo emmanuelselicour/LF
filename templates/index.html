@@ -3,29 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPT-Bet.Foot</title>
+    <title>GPT-Bet.Foot - Intelligence Artificielle pour les Paris Sportifs</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .container { background: #f5f5f5; padding: 20px; border-radius: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        textarea, input[type="file"] { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-        .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
-        .bet { background: #d4edda; border: 1px solid #c3e6cb; }
-        .no-bet { background: #f8d7da; border: 1px solid #f5c6cb; }
-        .loading { display: none; text-align: center; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        textarea, input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: monospace;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            margin-left: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.bet {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #28a745;
+        }
+        
+        .result.no-bet {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 2px solid #dc3545;
+        }
+        
+        .result.error {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 2px solid #ffc107;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .positive { color: #27ae60; }
+        .negative { color: #e74c3c; }
+        .neutral { color: #3498db; }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .example {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        
+        .example pre {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 GPT-Bet.Foot</h1>
-        <p>Analyse quantitative de matchs de football</p>
+        <div class="header">
+            <h1>🎯 GPT-Bet.Foot</h1>
+            <p>Intelligence Artificielle pour l'Analyse Quantitative des Paris Sportifs</p>
+        </div>
         
-        <form id="analyzeForm">
-            <div class="form-group">
-                <label for="textData">Données du match (format texte) :</label>
-                <textarea id="textData" name="text_data" rows="6" placeholder="Exemple:
+        <div class="content">
+            <div class="form-section">
+                <h2>📊 Analyse de Match</h2>
+                <p>Entrez les données du match et uploader un screenshot des cotes pour obtenir une analyse quantifiée.</p>
+                
+                <form id="analyzeForm">
+                    <div class="form-group">
+                        <label for="textData">Données du Match :</label>
+                        <textarea id="textData" name="text_data" placeholder="Exemple:
 PSG vs Lorient
 2.10 3.40 3.60
 xg_psg: 2.3
@@ -33,31 +249,91 @@ xg_lorient: 0.9
 classement_psg: 1
 classement_lorient: 16
 forme_psg: ★★★★☆
-forme_lorient: ★★☆☆☆"></textarea>
+forme_lorient: ★★☆☆☆
+Compositions:
+PSG: Donnarumma, Hakimi, Marquinhos, Skriniar, Hernandez, Zaire-Emery, Ugarte, Vitinha, Dembélé, Kolo Muani, Mbappé
+Lorient: Mvogo, Mendy, Laporte, Talbi, Le Goff, Abergel, Ponceau, Faivre, Bouanani, Tosin, Bamba"></textarea>
+                        
+                        <div class="example">
+                            <strong>Format requis :</strong>
+                            <pre>Équipe1 vs Équipe2
+Cote1 CoteNul Cote2
+xg_equipe1: 2.1
+xg_equipe2: 0.8
+classement_equipe1: 1
+classement_equipe2: 14
+forme_equipe1: ★★★★☆
+forme_equipe2: ★★☆☆☆</pre>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="imageFile">Screenshot des Cotes (Optionnel) :</label>
+                        <input type="file" id="imageFile" name="image_file" accept="image/*">
+                        <small>Format supporté: JPG, PNG. Prenez un screenshot des cotes 1N2 du bookmaker.</small>
+                    </div>
+                    
+                    <button type="submit" class="btn">🔍 Analyser le Match</button>
+                </form>
             </div>
             
-            <div class="form-group">
-                <label for="imageFile">Screenshot des cotes (optionnel) :</label>
-                <input type="file" id="imageFile" name="image_file" accept="image/*">
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Analyse en cours avec l'IA GPT-4...</p>
             </div>
             
-            <button type="submit">Analyser le Match</button>
-        </form>
-        
-        <div class="loading" id="loading">
-            <p>🔍 Analyse en cours...</p>
-        </div>
-        
-        <div id="result"></div>
-        
-        <div style="margin-top: 30px;">
-            <button onclick="viewTrades()">Voir l'Historique</button>
-            <button onclick="viewReport()">Rapport de Performance</button>
-            <button onclick="viewBankroll()">Bankroll Actuelle</button>
+            <div id="result" class="result"></div>
+            
+            <div class="stats-grid" id="statsGrid" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTrades">0</div>
+                    <div class="stat-label">Total Paris</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="winRate">0%</div>
+                    <div class="stat-label">Taux de Réussite</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="roi">0%</div>
+                    <div class="stat-label">ROI</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="bankroll">10,000€</div>
+                    <div class="stat-label">Bankroll</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="viewTrades()">📋 Historique des Paris</button>
+                <button class="btn btn-secondary" onclick="viewPerformance()">📈 Rapport Détaillé</button>
+                <button class="btn btn-secondary" onclick="viewBankroll()">💰 Bankroll Actuelle</button>
+                <button class="btn btn-secondary" onclick="resetSystem()">🔄 Reset Système</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // Mise à jour des statistiques
+        async function updateStats() {
+            try {
+                const response = await fetch('/performance');
+                const data = await response.json();
+                
+                if (!data.error) {
+                    document.getElementById('totalTrades').textContent = data.total_trades;
+                    document.getElementById('winRate').textContent = (data.win_rate * 100).toFixed(1) + '%';
+                    document.getElementById('roi').textContent = data.roi.toFixed(2) + '%';
+                    document.getElementById('roi').className = 'stat-value ' + (data.roi >= 0 ? 'positive' : 'negative');
+                    document.getElementById('bankroll').textContent = data.final_bankroll.toLocaleString('fr-FR') + '€';
+                    
+                    document.getElementById('statsGrid').style.display = 'grid';
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+        
+        // Gestion du formulaire
         document.getElementById('analyzeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -69,8 +345,10 @@ forme_lorient: ★★☆☆☆"></textarea>
                 formData.append('image_file', imageFile);
             }
             
+            // Affichage loading
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('result').innerHTML = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('result').className = 'result';
             
             try {
                 const response = await fetch('/analyze', {
@@ -80,59 +358,134 @@ forme_lorient: ★★☆☆☆"></textarea>
                 
                 const result = await response.json();
                 displayResult(result);
+                await updateStats();
                 
             } catch (error) {
-                document.getElementById('result').innerHTML = 
-                    '<div class="no-bet">Erreur: ' + error.message + '</div>';
+                displayResult({ error: 'Erreur de connexion: ' + error.message });
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         });
         
+        // Affichage des résultats
         function displayResult(result) {
+            const resultDiv = document.getElementById('result');
             let html = '';
             
             if (result.error) {
-                html = '<div class="no-bet">Erreur: ' + result.error + '</div>';
+                html = `
+                    <div class="error">
+                        <h3>❌ Erreur</h3>
+                        <p>${result.error}</p>
+                    </div>
+                `;
+                resultDiv.className = 'result error';
             } else if (result.action === 'BET') {
                 html = `
-                    <div class="result bet">
-                        <h3>✅ RECOMMANDATION DE PARI</h3>
-                        <p><strong>Match:</strong> ${result.match}</p>
-                        <p><strong>Pari:</strong> ${result.bet} @${result.odds}</p>
-                        <p><strong>Cote Fair:</strong> ${result.fair_odds}</p>
-                        <p><strong>Edge:</strong> +${result.edge}%</p>
-                        <p><strong>Mise:</strong> ${result.stake}€ (${result.stake_percent}% de la bankroll)</p>
-                        <p><strong>Confiance:</strong> ${Math.round(result.confidence * 100)}%</p>
+                    <div class="bet">
+                        <h3>✅ PARI RECOMMANDÉ</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${result.match}</div>
+                                <div class="stat-label">Match</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${result.bet} @${result.odds}</div>
+                                <div class="stat-label">Pari & Cote</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value positive">+${result.edge}%</div>
+                                <div class="stat-label">Edge</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${result.stake}€</div>
+                                <div class="stat-label">Mise Kelly</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <p><strong>Cote Fair:</strong> ${result.fair_odds} | <strong>Confiance:</strong> ${Math.round(result.confidence * 100)}%</p>
+                            <p><strong>Probabilités:</strong> Domicile ${(result.probabilities.home * 100).toFixed(1)}% | Nul ${(result.probabilities.draw * 100).toFixed(1)}% | Extérieur ${(result.probabilities.away * 100).toFixed(1)}%</p>
+                        </div>
                     </div>
                 `;
+                resultDiv.className = 'result bet';
             } else {
                 html = `
-                    <div class="result no-bet">
-                        <h3>❌ PAS DE PARI</h3>
-                        <p>Edge maximum: ${result.max_edge}% (seuil: 3%)</p>
+                    <div class="no-bet">
+                        <h3>⏸️ PAS DE PARI</h3>
+                        <p>Edge maximum détecté: <strong>${result.max_edge}%</strong> (seuil minimum: 3%)</p>
+                        <p>Aucune valeur betting identifiée sur ce match.</p>
                     </div>
                 `;
+                resultDiv.className = 'result no-bet';
             }
             
-            document.getElementById('result').innerHTML = html;
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
         }
         
+        // Fonctions de contrôle
         async function viewTrades() {
-            const response = await fetch('/trades');
-            const trades = await response.json();
-            alert('Trades: ' + JSON.stringify(trades, null, 2));
+            try {
+                const response = await fetch('/trades');
+                const trades = await response.json();
+                
+                if (trades.length === 0) {
+                    alert('Aucun trade enregistré pour le moment.');
+                    return;
+                }
+                
+                let tradesHtml = 'Historique des Paris:\n\n';
+                trades.forEach(trade => {
+                    tradesHtml += `${trade.id}: ${trade.match} - ${trade.bet} @${trade.odds} (Edge: +${trade.edge}%) - ${trade.result}\n`;
+                });
+                
+                alert(tradesHtml);
+            } catch (error) {
+                alert('Erreur lors de la récupération des trades.');
+            }
+        }
+        
+        async function viewPerformance() {
+            try {
+                const response = await fetch('/performance');
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                const reportUrl = '/report?' + new Date().getTime();
+                window.open(reportUrl, '_blank');
+            } catch (error) {
+                alert('Erreur lors de la génération du rapport.');
+            }
         }
         
         async function viewBankroll() {
-            const response = await fetch('/bankroll');
-            const data = await response.json();
-            alert('Bankroll actuelle: ' + data.bankroll + '€');
+            try {
+                const response = await fetch('/bankroll');
+                const data = await response.json();
+                alert(`💰 Bankroll actuelle: ${data.bankroll.toLocaleString('fr-FR')}€`);
+            } catch (error) {
+                alert('Erreur lors de la récupération de la bankroll.');
+            }
         }
         
-        function viewReport() {
-            window.open('/report', '_blank');
+        function resetSystem() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser le système ? Tous les trades seront perdus.')) {
+                fetch('/reset', { method: 'POST' })
+                    .then(() => {
+                        alert('Système réinitialisé avec succès !');
+                        location.reload();
+                    })
+                    .catch(() => alert('Erreur lors de la réinitialisation.'));
+            }
         }
+        
+        // Chargement initial des stats
+        updateStats();
     </script>
 </body>
 </html>
