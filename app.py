@@ -12,15 +12,12 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import re
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Configuration OpenAI avec votre clé
-client = openai.OpenAI(api_key="6742012865:AAEPLQN_mianrxvljmdx6dStwb_iOS3rAQU")
+# Configuration OpenAI
+client = openai.OpenAI(api_key=os.environ.get('OPENAI_API_KEY', '6742012865:AAEPLQN_mianrxvljmdx6dStwb_iOS3rAQU'))
 
 class GPTBetFoot:
     def __init__(self, bankroll=10000):
@@ -358,7 +355,17 @@ def health():
         'status': 'healthy', 
         'timestamp': datetime.now().isoformat(),
         'trades_count': len(bot.trades),
-        'bankroll': bot.bankroll
+        'bankroll': bot.bankroll,
+        'service': 'GPT-Bet.Foot API'
+    })
+
+@app.route('/test')
+def test():
+    """Route de test simple"""
+    return jsonify({
+        'message': 'GPT-Bet.Foot est opérationnel!',
+        'version': '1.0.0',
+        'timestamp': datetime.now().isoformat()
     })
 
 if __name__ == '__main__':
