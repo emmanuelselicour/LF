@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-Bet.Foot</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { background: #f5f5f5; padding: 20px; border-radius: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        textarea, input[type="file"] { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+        .bet { background: #d4edda; border: 1px solid #c3e6cb; }
+        .no-bet { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .loading { display: none; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 GPT-Bet.Foot</h1>
+        <p>Analyse quantitative de matchs de football</p>
+        
+        <form id="analyzeForm">
+            <div class="form-group">
+                <label for="textData">Données du match (format texte) :</label>
+                <textarea id="textData" name="text_data" rows="6" placeholder="Exemple:
+PSG vs Lorient
+2.10 3.40 3.60
+xg_psg: 2.3
+xg_lorient: 0.9
+classement_psg: 1
+classement_lorient: 16
+forme_psg: ★★★★☆
+forme_lorient: ★★☆☆☆"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="imageFile">Screenshot des cotes (optionnel) :</label>
+                <input type="file" id="imageFile" name="image_file" accept="image/*">
+            </div>
+            
+            <button type="submit">Analyser le Match</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <p>🔍 Analyse en cours...</p>
+        </div>
+        
+        <div id="result"></div>
+        
+        <div style="margin-top: 30px;">
+            <button onclick="viewTrades()">Voir l'Historique</button>
+            <button onclick="viewReport()">Rapport de Performance</button>
+            <button onclick="viewBankroll()">Bankroll Actuelle</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('analyzeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('text_data', document.getElementById('textData').value);
+            
+            const imageFile = document.getElementById('imageFile').files[0];
+            if (imageFile) {
+                formData.append('image_file', imageFile);
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').innerHTML = '';
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                displayResult(result);
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = 
+                    '<div class="no-bet">Erreur: ' + error.message + '</div>';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+        
+        function displayResult(result) {
+            let html = '';
+            
+            if (result.error) {
+                html = '<div class="no-bet">Erreur: ' + result.error + '</div>';
+            } else if (result.action === 'BET') {
+                html = `
+                    <div class="result bet">
+                        <h3>✅ RECOMMANDATION DE PARI</h3>
+                        <p><strong>Match:</strong> ${result.match}</p>
+                        <p><strong>Pari:</strong> ${result.bet} @${result.odds}</p>
+                        <p><strong>Cote Fair:</strong> ${result.fair_odds}</p>
+                        <p><strong>Edge:</strong> +${result.edge}%</p>
+                        <p><strong>Mise:</strong> ${result.stake}€ (${result.stake_percent}% de la bankroll)</p>
+                        <p><strong>Confiance:</strong> ${Math.round(result.confidence * 100)}%</p>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div class="result no-bet">
+                        <h3>❌ PAS DE PARI</h3>
+                        <p>Edge maximum: ${result.max_edge}% (seuil: 3%)</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('result').innerHTML = html;
+        }
+        
+        async function viewTrades() {
+            const response = await fetch('/trades');
+            const trades = await response.json();
+            alert('Trades: ' + JSON.stringify(trades, null, 2));
+        }
+        
+        async function viewBankroll() {
+            const response = await fetch('/bankroll');
+            const data = await response.json();
+            alert('Bankroll actuelle: ' + data.bankroll + '€');
+        }
+        
+        function viewReport() {
+            window.open('/report', '_blank');
+        }
+    </script>
+</body>
+</html>
