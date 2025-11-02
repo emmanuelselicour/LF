@@ -1,0 +1,17 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="gpt-bet-foot",
+    version="1.0.0",
+    packages=find_packages(),
+    install_requires=[
+        "flask==2.3.3",
+        "openai==1.3.7", 
+        "pandas==2.1.3",
+        "numpy==1.24.3",
+        "matplotlib==3.7.2",
+        "python-dotenv==1.0.0",
+        "gunicorn==21.2.0",
+        "pillow==10.0.1",
+    ],
+)
