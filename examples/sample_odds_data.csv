@@ -1,0 +1,7 @@
+match_date,league,home_team,away_team,home_odds,draw_odds,away_odds,home_xg,away_xg,home_ranking,away_ranking
+2024-11-03,Ligue 1,PSG,Lorient,2.10,3.40,3.60,1.8,1.0,1,16
+2024-11-03,Ligue 1,Lyon,Marseille,2.45,3.20,2.80,1.4,1.2,8,5
+2024-11-03,Premier League,Man City,Liverpool,2.25,3.30,3.10,1.9,1.3,2,3
+2024-11-03,La Liga,Barcelona,Real Madrid,2.80,3.40,2.40,1.6,1.5,4,1
+2024-11-03,Bundesliga,Bayern,Dortmund,1.85,3.60,4.20,2.1,1.1,1,2
+2024-11-03,Serie A,Juventus,AC Milan,2.60,3.20,2.70,1.3,1.4,3,4

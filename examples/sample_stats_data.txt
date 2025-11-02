@@ -1,0 +1,54 @@
+FOOTBALL MATCH STATISTICS REPORT
+
+MATCH: PSG vs Lorient
+DATE: November 3, 2024
+LEAGUE: Ligue 1
+
+TEAM FORM (Last 5 matches):
+PSG: W-W-D-W-W (13 points)
+Lorient: L-D-L-W-L (4 points)
+
+EXPECTED GOALS (xG):
+PSG: 1.8 (Home advantage factor: +0.3)
+Lorient: 1.0 (Away disadvantage factor: -0.2)
+
+TEAM RANKINGS:
+PSG: 1st in Ligue 1 (25 points from 10 matches)
+Lorient: 16th in Ligue 1 (9 points from 10 matches)
+
+INJURY REPORT:
+PSG: Mbappe (doubtful, 75% chance to play), Kimpembe (out)
+Lorient: Moffi (suspended), Abergel (injured)
+
+HEAD-TO-HEAD (Last 5 meetings):
+PSG wins: 4
+Draws: 1
+Lorient wins: 0
+
+GOALS SCORED THIS SEASON:
+PSG: 24 goals (2.4 per match)
+Lorient: 11 goals (1.1 per match)
+
+GOALS CONCEDED THIS SEASON:
+PSG: 8 goals (0.8 per match)
+Lorient: 19 goals (1.9 per match)
+
+DAYS SINCE LAST MATCH:
+PSG: 4 days (Champions League on Wednesday)
+Lorient: 6 days (Last match on Thursday)
+
+WEATHER CONDITIONS:
+Paris: Light rain, 12°C, 70% humidity
+Expected impact: Slight reduction in goal expectancy (-0.1 goals)
+
+REFEREE ASSIGNMENT:
+Main referee: Clement Turpin
+Average cards per match: 3.2
+Penalty frequency: 0.3 per match
+
+BETTING MARKET INSIGHTS:
+- Sharp money coming in on PSG -1.5 goals
+- Public heavily backing PSG ML (80% of tickets)
+- Line movement: PSG opened at 1.95, now at 1.85
+- Draw odds have shortened from 3.60 to 3.40
+- Lorient odds drifting from 4.00 to 3.60
