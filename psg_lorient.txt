@@ -1,0 +1,11 @@
+PSG vs Lorient
+2.10 3.40 3.60
+xg_psg: 2.3
+xg_lorient: 0.9
+classement_psg: 1
+classement_lorient: 16
+forme_psg: ★★★★☆
+forme_lorient: ★★☆☆☆
+Compositions:
+PSG: Donnarumma - Hakimi, Marquinhos, Skriniar, Hernandez - Zaire-Emery, Ugarte, Vitinha - Dembélé, Kolo Muani, Mbappé
+Lorient: Mvogo - Mendy, Laporte, Talbi, Le Goff - Abergel, Ponceau - Faivre, Bouanani, Tosin - Bamba
