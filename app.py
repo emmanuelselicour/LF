@@ -17,10 +17,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Configuration OpenAI
-client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Configuration OpenAI avec votre clé
+client = openai.OpenAI(api_key="6742012865:AAEPLQN_mianrxvljmdx6dStwb_iOS3rAQU")
 
 class GPTBetFoot:
     def __init__(self, bankroll=10000):
@@ -40,50 +40,40 @@ class GPTBetFoot:
     
     def ocr_odds_from_image(self, image_file):
         """OCR des images via GPT-4 Vision"""
-        # Convertir l'image en base64
-        image_data = image_file.read()
-        base64_image = base64.b64encode(image_data).decode('utf-8')
-        
-        response = client.chat.completions.create(
-            model="gpt-4-vision-preview",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text", 
-                            "text": "Extrait les cotes sportives exactes. Retourne uniquement du JSON: {'home_team': 'nom', 'away_team': 'nom', 'odds_home': X.XX, 'odds_draw': X.XX, 'odds_away': X.XX}"
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
-            ],
-            max_tokens=300
-        )
-        
         try:
+            image_data = image_file.read()
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+            
+            response = client.chat.completions.create(
+                model="gpt-4-vision-preview",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text", 
+                                "text": "Extrait les cotes sportives exactes. Retourne uniquement du JSON: {'home_team': 'nom', 'away_team': 'nom', 'odds_home': X.XX, 'odds_draw': X.XX, 'odds_away': X.XX}"
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=300
+            )
+            
             return json.loads(response.choices[0].message.content)
-        except:
-            # Fallback parsing
-            text = response.choices[0].message.content
-            odds = re.findall(r'(\d+\.\d{2})', text)
-            if len(odds) >= 3:
-                return {
-                    'odds_home': float(odds[0]),
-                    'odds_draw': float(odds[1]),
-                    'odds_away': float(odds[2])
-                }
+        except Exception as e:
+            print(f"OCR Error: {e}")
             return None
 
     def calculate_fair_odds(self, data):
         """Calcule les cotes fair"""
         try:
-            # Extraction des données avec valeurs par défaut
             xg_home = float(data['xg'][0][1]) if data['xg'] else 1.5
             xg_away = float(data['xg'][1][1]) if len(data['xg']) > 1 else 1.0
             
@@ -93,25 +83,21 @@ class GPTBetFoot:
             form_home = data['form'][0][1].count('★') * 0.2 if data['form'] else 0.6
             form_away = data['form'][1][1].count('★') * 0.2 if len(data['form']) > 1 else 0.4
             
-            # Calcul du score
             delta_xg = xg_home - xg_away
             delta_rank = (20 - rank_home) - (20 - rank_away)
             delta_form = form_home - form_away
             
             score = 0.3 * delta_xg + 0.2 * delta_rank + 0.1 * delta_form
             
-            # Probabilités
             p_home = 1 / (1 + np.exp(-score))
             p_draw = 0.25 * (1 - abs(p_home - (1 - p_home)))
             p_away = 1 - p_home - p_draw
             
-            # Normalisation
             total = p_home + p_draw + p_away
             p_home /= total
             p_draw /= total 
             p_away /= total
             
-            # Cotes fair avec marge
             margin = 0.945
             fair_odds = {
                 'home': round(1 / (p_home * margin), 2),
@@ -135,9 +121,12 @@ class GPTBetFoot:
         """Calcule l'edge"""
         edges = {}
         for market in ['home', 'draw', 'away']:
-            if fair_odds.get(market) and book_odds.get(f'odds_{market}'):
-                if fair_odds[market] > book_odds[f'odds_{market}']:
-                    edge = (fair_odds[market] - book_odds[f'odds_{market}']) / book_odds[f'odds_{market}']
+            fair_key = market
+            book_key = f'odds_{market}'
+            
+            if fair_odds.get(fair_key) and book_odds.get(book_key):
+                if fair_odds[fair_key] > book_odds[book_key]:
+                    edge = (fair_odds[fair_key] - book_odds[book_key]) / book_odds[book_key]
                     edges[market] = round(edge * 100, 2)
                 else:
                     edges[market] = 0.0
@@ -158,10 +147,8 @@ class GPTBetFoot:
 
     def analyze_match(self, text_content, image_file=None):
         """Analyse complète d'un match"""
-        # Parsing données texte
         data = self.parse_text_content(text_content)
         
-        # Récupération cotes bookmaker
         if image_file:
             book_odds = self.ocr_odds_from_image(image_file)
         else:
@@ -175,22 +162,12 @@ class GPTBetFoot:
         if not book_odds:
             return {'error': 'Impossible de lire les cotes'}
         
-        # Calcul cotes fair
         fair_data = self.calculate_fair_odds(data)
         if 'error' in fair_data:
             return fair_data
         
-        # Conversion format
-        book_odds_dict = {
-            'home': book_odds['odds_home'],
-            'draw': book_odds['odds_draw'],
-            'away': book_odds['odds_away']
-        }
-        
-        # Calcul edges
         edges = self.calculate_edge(fair_data['fair_odds'], book_odds)
         
-        # Recherche meilleur edge
         if edges:
             best_market = max(edges.items(), key=lambda x: x[1])
             
@@ -202,10 +179,10 @@ class GPTBetFoot:
                 
                 team_names = data['teams'][0] if data['teams'] else ('Home', 'Away')
                 
-                return {
+                recommendation = {
                     'match': f"{team_names[0]} vs {team_names[1]}",
                     'bet': best_market[0],
-                    'odds': book_odds_dict[best_market[0]],
+                    'odds': book_odds[f'odds_{best_market[0]}'],
                     'fair_odds': fair_data['fair_odds'][best_market[0]],
                     'edge': best_market[1],
                     'stake': stake,
@@ -215,8 +192,74 @@ class GPTBetFoot:
                     'timestamp': datetime.now().isoformat(),
                     'action': 'BET'
                 }
+                
+                # Simulation du trade
+                self.simulate_trade(recommendation)
+                return recommendation
         
         return {'action': 'NO_BET', 'max_edge': best_market[1] if edges else 0}
+
+    def simulate_trade(self, recommendation):
+        """Simule l'exécution d'un trade"""
+        import random
+        
+        trade_id = f"TRADE_{len(self.trades) + 1:04d}"
+        
+        # Simulation avec 55% de win rate
+        win = random.random() < 0.55
+        
+        if win:
+            profit = recommendation['stake'] * (recommendation['odds'] - 1)
+            result = 'WIN'
+        else:
+            profit = -recommendation['stake']
+            result = 'LOSE'
+        
+        trade = {
+            'id': trade_id,
+            **recommendation,
+            'result': result,
+            'profit': round(profit, 2),
+            'bankroll_before': self.bankroll
+        }
+        
+        self.bankroll += profit
+        trade['bankroll_after'] = round(self.bankroll, 2)
+        
+        self.trades.append(trade)
+        return trade
+
+    def get_performance_report(self):
+        """Génère un rapport de performance"""
+        if not self.trades:
+            return {'error': 'Aucun trade à analyser'}
+        
+        df = pd.DataFrame(self.trades)
+        
+        total_trades = len(df)
+        winning_trades = len(df[df['result'] == 'WIN'])
+        win_rate = winning_trades / total_trades
+        
+        total_staked = df['stake'].sum()
+        total_profit = df['profit'].sum()
+        roi = (total_profit / total_staked) * 100 if total_staked > 0 else 0
+        
+        # Calcul drawdown
+        df['cumulative_profit'] = df['profit'].cumsum()
+        df['peak'] = df['cumulative_profit'].cummax()
+        df['drawdown'] = df['cumulative_profit'] - df['peak']
+        max_drawdown = df['drawdown'].min()
+        
+        return {
+            'total_trades': total_trades,
+            'winning_trades': winning_trades,
+            'win_rate': round(win_rate, 3),
+            'total_staked': round(total_staked, 2),
+            'total_profit': round(total_profit, 2),
+            'roi': round(roi, 2),
+            'max_drawdown': round(max_drawdown, 2),
+            'final_bankroll': round(self.bankroll, 2)
+        }
 
 # Instance globale
 bot = GPTBetFoot()
@@ -227,7 +270,6 @@ def index():
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    """Endpoint d'analyse de match"""
     try:
         text_content = request.form.get('text_data', '')
         image_file = request.files.get('image_file')
@@ -243,58 +285,81 @@ def analyze():
 
 @app.route('/trades')
 def get_trades():
-    """Retourne l'historique des trades"""
     return jsonify(bot.trades)
 
 @app.route('/bankroll')
 def get_bankroll():
-    """Retourne la bankroll actuelle"""
-    return jsonify({'bankroll': bot.bankroll})
+    return jsonify({'bankroll': round(bot.bankroll, 2)})
+
+@app.route('/performance')
+def get_performance():
+    report = bot.get_performance_report()
+    return jsonify(report)
 
 @app.route('/report')
 def generate_report():
-    """Génère un rapport de performance"""
     if not bot.trades:
         return jsonify({'error': 'Aucun trade à analyser'})
     
     try:
         df = pd.DataFrame(bot.trades)
         
-        # Calcul métriques
-        total_trades = len(df)
-        winning_trades = len(df[df['result'] == 'WIN'])
-        win_rate = winning_trades / total_trades if total_trades > 0 else 0
+        plt.figure(figsize=(12, 8))
         
-        total_staked = df['stake'].sum()
-        total_profit = df['profit'].sum() if 'profit' in df.columns else 0
-        roi = (total_profit / total_staked) * 100 if total_staked > 0 else 0
-        
-        # Génération graphique
-        plt.figure(figsize=(10, 6))
-        if 'cumulative_profit' in df.columns:
-            plt.plot(df['cumulative_profit'], label='Profit Cumulé', linewidth=2)
-            plt.fill_between(df.index, df['drawdown'], alpha=0.3, color='red', label='Drawdown')
-        plt.title('Performance GPT-Bet.Foot')
-        plt.xlabel('Nombre de Trades')
-        plt.ylabel('Profit (€)')
+        # Graphique 1: Évolution bankroll
+        plt.subplot(2, 2, 1)
+        plt.plot(df['bankroll_after'], label='Bankroll', color='blue', linewidth=2)
+        plt.title('Évolution de la Bankroll')
+        plt.xlabel('Trade')
+        plt.ylabel('Bankroll (€)')
+        plt.grid(True, alpha=0.3)
         plt.legend()
+        
+        # Graphique 2: Profit cumulé
+        plt.subplot(2, 2, 2)
+        plt.plot(df['cumulative_profit'], label='Profit Cumulé', color='green', linewidth=2)
+        plt.fill_between(df.index, df['drawdown'], alpha=0.3, color='red', label='Drawdown')
+        plt.title('Profit Cumulé & Drawdown')
+        plt.xlabel('Trade')
+        plt.ylabel('Profit (€)')
+        plt.grid(True, alpha=0.3)
+        plt.legend()
+        
+        # Graphique 3: Distribution des edges
+        plt.subplot(2, 2, 3)
+        edges = [t['edge'] for t in bot.trades if 'edge' in t]
+        plt.hist(edges, bins=15, alpha=0.7, color='orange', edgecolor='black')
+        plt.title('Distribution des Edges')
+        plt.xlabel('Edge (%)')
+        plt.ylabel('Fréquence')
         plt.grid(True, alpha=0.3)
         
-        # Sauvegarde en mémoire
+        # Graphique 4: Résultats par type de pari
+        plt.subplot(2, 2, 4)
+        bet_types = df['bet'].value_counts()
+        plt.pie(bet_types.values, labels=bet_types.index, autopct='%1.1f%%', startangle=90)
+        plt.title('Répartition des Paris')
+        
+        plt.tight_layout()
+        
         img = io.BytesIO()
         plt.savefig(img, format='png', dpi=100, bbox_inches='tight')
         img.seek(0)
         plt.close()
         
-        return send_file(img, mimetype='image/png', as_attachment=False)
+        return send_file(img, mimetype='image/png')
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/health')
 def health():
-    """Health check pour Render"""
-    return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
+    return jsonify({
+        'status': 'healthy', 
+        'timestamp': datetime.now().isoformat(),
+        'trades_count': len(bot.trades),
+        'bankroll': bot.bankroll
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
